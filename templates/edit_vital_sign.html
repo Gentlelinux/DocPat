@@ -1,0 +1,87 @@
+{% extends "base.html" %} {# Stelle sicher, dass dies der richtige Name deiner Basisvorlage ist #}
+{% block title %}Vitalwerte bearbeiten für {{ patient.nachname }}, {{ patient.vorname }}{% endblock %} {# Patient ist hier immer bekannt #}
+
+{% block content %}
+    {# Titel anpassen, kann optional Patientennamen anzeigen #}
+    <h2>Vitalwerte bearbeiten für Patient: {{ patient.nachname }}, {{ patient.vorname }}</h2> {# Patient ist hier immer bekannt #}
+
+    {# Action zeigt zur edit_vital_sign Route mit der ID des Vitalwerts #}
+    <form method="POST" action="{{ url_for('bp.edit_vital_sign', vital_sign_id=vital_sign.id) }}">
+        {{ form.hidden_tag() }} {# WICHTIG für CSRF-schutz! #}
+
+        {# KORRIGIERT: Patientenauswahl oder verstecktes patient_id Feld entfernt. Patient kommt über das Objekt. #}
+         {# Optional: Zeige Patientennamen an #}
+        <p>Patient: {{ patient.nachname }}, {{ patient.vorname }}</p>
+
+
+        {# Das Datum ist oft das Wichtigste für Vitalwerte #}
+        <div class="form-group mb-3">
+            {{ form.timestamp.label(class="form-label") }}<br>
+            {{ form.timestamp(class="form-control") }}
+             {% for error in form.timestamp.errors %}
+                <span class="text-danger">[{{ error }}]</span>
+            {% endfor %}
+        </div>
+        <br> {# Ein bisschen Abstand #}
+
+        {# Die Vitalwertfelder #}
+        <div class="form-group mb-3">
+            {{ form.height_cm.label(class="form-label") }}<br>
+            {{ form.height_cm(class="form-control") }}
+            {% for error in form.height_cm.errors %}
+                <span class="text-danger">[{{ error }}]</span>
+            {% endfor %}
+        </div>
+        <div class="form-group mb-3">
+            {{ form.weight_kg.label(class="form-label") }}<br>
+            {{ form.weight_kg(class="form-control") }}
+             {% for error in form.weight_kg.errors %}
+                <span class="text-danger">[{{ error }}]</span>
+            {% endfor %}
+        </div>
+         <div class="form-group mb-3">
+            {{ form.puls.label(class="form-label") }}<br>
+            {{ form.puls(class="form-control") }}
+             {% for error in form.puls.errors %}
+                <span class="text-danger">[{{ error }}]</span>
+            {% endfor %}
+        </div>
+         <div class="form-group mb-3">
+            {{ form.blood_pressure.label(class="form-label") }}<br>
+            {{ form.blood_pressure(class="form-control") }}
+             {% for error in form.blood_pressure.errors %}
+                <span class="text-danger">[{{ error }}]</span>
+            {% endfor %}
+        </div>
+         <div class="form-group mb-3">
+            {{ form.temperature_celsius.label(class="form-label") }}<br>
+            {{ form.temperature_celsius(class="form-control") }}
+             {% for error in form.temperature_celsius.errors %}
+                <span class="text-danger">[{{ error }}]</span>
+            {% endfor %}
+        </div>
+        <div class="form-group mb-3">
+            {{ form.fev1.label(class="form-label") }}<br>
+            {{ form.fev1(class="form-control") }}
+             {% for error in form.fev1.errors %}
+                <span class="text-danger">[{{ error }}]</span>
+            {% endfor %}
+        </div>
+         <div class="form-group mb-3">
+            {{ form.fvc.label(class="form-label") }}<br>
+            {{ form.fvc(class="form-control") }}
+             {% for error in form.fvc.errors %}
+                <span class="text-danger">[{{ error }}]</span>
+            {% endfor %}
+        </div>
+
+        <br>
+        <div class="form-group">
+            {{ form.submit(value='Änderungen speichern', class="btn btn-primary") }} {# Button-Text anpassen #}
+        </div>
+    </form>
+
+    {# Zurück-Link führt immer zur Patientendetailseite des zugehörigen Vitalwerts #}
+    <p><a href="{{ url_for('bp.view_patient', patient_id=vital_sign.patient.id) }}">Zurück zur Patientendetailansicht</a></p> {# KORRIGIERT: patient.id anstatt vital_sign.patient_id #}
+
+{% endblock %}

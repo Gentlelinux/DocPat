@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+    {# Bootstrap CSS einbinden #}
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous">
+
+    <!-- Hier könnten eigene CSS-Dateien nach Bootstrap verlinkt werden, um Stile zu überschreiben -->
+    {# <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}"> #}
+
+    <title>DocPat - {% block title %}{% endblock %}</title>
+</head>
+<body>
+    <header class="bg-light py-3">
+        <div class="container">
+            {# Link auf den H1-Titel, der zum Dashboard (bp.index) führt #}
+            <h1 class="mb-0"><a href="{{ url_for('bp.index') }}" style="text-decoration: none; color: inherit;">DocPat 🩺</a></h1> {# Stethoskop-Emoji #}
+            <nav class="nav">
+                {# Link zurück zum Dashboard #}
+                 <a class="nav-link" href="{{ url_for('bp.index') }}">Dashboard 🏠</a> | {# Haus-Emoji #}
+                {# Links zu den Hauptübersichten (können auch über Dashboard erreicht werden) #}
+                 <a class="nav-link" href="{{ url_for('bp.patient_list') }}">Patientenliste 📄</a> |
+                 <a class="nav-link" href="{{ url_for('bp.list_appointments') }}">Terminübersicht 📅</a> |
+                 <a class="nav-link" href="{{ url_for('bp.list_visits') }}">Visitenübersicht 📝</a> |
+                 <a class="nav-link" href="{{ url_for('bp.reports_index') }}">Reports 📊</a>
+                 {# Die spezifischen Anlege-Links sind jetzt primär auf dem Dashboard #}
+            </nav>
+        </div>
+    </header>
+
+    <main class="container my-4">
+        <!-- Hier wird der Inhalt der einzelnen Seiten eingefügt -->
+         {# Flash-Nachrichten anzeigen #}
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                <div class="flashes mt-3">
+                {% for category, message in messages %}
+                    {# Nutze Bootstrap Alert Klassen für Flash Messages #}
+                    <div class="alert alert-{{ category if category != 'message' else 'info' }}" role="alert">
+                        {{ message }}
+                    </div>
+                {% endfor %}
+                </div>
+            {% endif %}
+        {% endwith %}
+
+        {% block content %}{% endblock %}
+    </main>
+
+    <footer class="bg-light py-3 mt-4">
+        <div class="container">
+            <p class="text-center text-muted">&copy; 2025 DocPat</p> <!-- Jahreszahl kannst du anpassen ;) -->
+        </div>
+    </footer>
+
+    {# Bootstrap JS einbinden (für einige Komponenten wie Dropdowns, Navbars etc.) #}
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL" crossorigin="anonymous"></script>
+
+    <!-- Hier könnten eigene JavaScript-Dateien verlinkt werden -->
+</body>
+</html>

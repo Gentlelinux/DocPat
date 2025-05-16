@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+{% block title %}{{ title }}{% endblock %}
+
+{% block content %}
+    <h2>{{ title }} 📊</h2>
+
+    <p>Wählen Sie einen Report aus:</p>
+
+    <ul>
+        {# Link zum Termin-Report #}
+        <li><a href="{{ url_for('bp.report_appointments_by_date') }}">Termine nach Datumsbereich filtern</a></li>
+        {# Link zum Visiten-Report #}
+        <li><a href="{{ url_for('bp.report_visits_by_date') }}">Visiten nach Datumsbereich filtern</a></li>
+        {# Link zum Impfungs-Report #}
+        <li><a href="{{ url_for('bp.report_vaccinations_by_patient_date') }}">Impfungen nach Patient und Datum filtern</a></li>
+        {# Link zum Injektions-Report #}
+        <li><a href="{{ url_for('bp.report_injections_by_patient_date') }}">Injektionen nach Patient und Datum filtern</a></li>
+        {# NEU: Link zum Vitalwerte-Report #}
+        <li><a href="{{ url_for('bp.report_vital_signs_by_patient_date') }}">Vitalwerte nach Patient und Datum filtern</a></li>
+        {# Hier können später weitere Links zu anderen Reports folgen #}
+    </ul>
+
+{% endblock content %}

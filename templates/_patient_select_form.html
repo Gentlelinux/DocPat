@@ -1,0 +1,20 @@
+{# templates/_patient_select_form.html #}
+
+{# Formular zur Auswahl eines Patienten #}
+{# Die Action wird jetzt von der Variable form_action gesetzt, die im übergeordneten Template übergeben wird #}
+<form method="POST" action="{{ form_action }}"> {# GEÄNDERT: action liest aus Variable #}
+    {{ form.hidden_tag() }} {# CSRF Schutz #}
+
+    <div class="form-group">
+        {{ form.patient_id.label }}<br>
+        {{ form.patient_id(class="form-control") }} {# Bootstrap Klasse #}
+         {% for error in form.patient_id.errors %}
+            <span style="color: red;">[{{ error }}]</span>
+        {% endfor %}
+    </div>
+
+    <br>
+    <div class="form-group">
+        {{ form.submit(class="btn btn-primary") }} {# Bootstrap Button #}
+    </div>
+</form>

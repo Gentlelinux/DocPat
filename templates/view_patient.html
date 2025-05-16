@@ -1,0 +1,322 @@
+{% extends "base.html" %}
+{% block title %}Patient: {{ patient.nachname }}, {{ patient.vorname }}{% endblock %}
+
+{% block content %}
+    <h2>Details zu Patient #{{ patient.id }}: {{ patient.nachname }}, {{ patient.vorname }}</h2>
+
+    {# Buttons zum Bearbeiten und Löschen #}
+    <div class="mb-3"> {# Bootstrap margin-bottom #}
+        {# Link zum Bearbeitungsformular #}
+        <a href="{{ url_for('bp.edit_patient', patient_id=patient.id) }}" class="btn btn-secondary me-1">Patientendaten bearbeiten</a> {# Bootstrap Button und margin-end #}
+        {# Formular für den Löschen-Button (POST Request) #}
+        <form action="{{ url_for('bp.delete_patient', patient_id=patient.id) }}" method="POST" style="display:inline-block;">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"> {# Wichtig für CSRF Schutz #}
+            <button type="submit" class="btn btn-danger" onclick="return confirm('Sicher, dass dieser Patient gelöscht werden soll? ACHTUNG: Zugehörige Einträge (Visiten, Termine etc.) bleiben möglicherweise bestehen und müssen manuell zugeordnet oder gelöscht werden!');">Patient löschen</button> {# Bootstrap Button, Bestätigung per JS #}
+        </form>
+    </div>
+
+
+    <h3>Persönliche Daten 👤</h3> {# NEU: Emoji #}
+    <p><strong>Vorname:</strong> {{ patient.vorname }}</p>
+    <p><strong>Nachname:</strong> {{ patient.nachname }}</p>
+    {# NEU: Geburtsdatum und berechnetes Alter anzeigen #}
+    <p><strong>Geburtsdatum:</strong> {{ patient.geburtsdatum.strftime('%d.%m.%Y') if patient.geburtsdatum else '-' }}</p>
+    {# KORRIGIERT: Das Alter mit der übergebenen Variable 'today_date' berechnen #}
+    <p><strong>Alter:</strong>
+        {% if patient.geburtsdatum and today_date %} {# Prüfen, ob Geburtsdatum und today_date existieren #}
+            {% set birthdate = patient.geburtsdatum %}
+            {% set age = today_date.year - birthdate.year %}
+            {# Prüfe, ob der Geburtstag dieses Jahr schon war #}
+            {% if (today_date.month, today_date.day) < (birthdate.month, birthdate.day) %}
+                {% set age = age - 1 %}
+            {% endif %}
+            {{ age }}
+        {% else %}
+            -
+        {% endif %}
+    </p>
+
+    <p><strong>Geschlecht:</strong> {{ patient.geschlecht if patient.geschlecht else '-' }}</p>
+
+    {# NEU: Land, Ethnie, Blutgruppe anzeigen (Werte aus Dropdown) #}
+    <p><strong>Land:</strong> {{ patient.land if patient.land else '-' }}</p>
+    <p><strong>Ethnie:</strong> {{ patient.ethnie if patient.ethnie else '-' }}</p>
+    <p><strong>Blutgruppe:</strong> {{ patient.blutgruppe if patient.blutgruppe else '-' }}</p>
+
+
+    <h3>Kontaktdaten 📞</h3> {# NEU: Emoji #}
+    <p><strong>Adresse:</strong> {{ patient.adresse if patient.adresse else '-' }}</p>
+    <p><strong>PLZ:</strong> {{ patient.plz if patient.plz else '-' }}</p>
+    <p><strong>Ort:</strong> {{ patient.ort if patient.ort else '-' }}</p>
+    {# KORRIGIERT: Feld Land hier entfernen, da es bei persönlichen Daten ist #}
+    {# <p><strong>Land (Kontakt):</strong> {{ patient.land if patient.land else '-' }}</p> #}
+    <p><strong>Telefon:</strong> {{ patient.telefon if patient.telefon else '-' }}</p>
+    <p><strong>E-Mail:</strong> {{ patient.email if patient.email else '-' }}</p>
+
+    <h3>Klinische Informationen 📋</h3> {# NEU: Emoji #}
+    <p><strong>Krankenkasse:</strong> {{ patient.krankenkasse if patient.krankenkasse else '-' }}</p>
+    <p><strong>Diagnosen:</strong> {{ patient.diagnosen if patient.diagnosen else '-' }}</p>
+    <p><strong>Ernährung:</strong> {{ patient.ernaehrung if patient.ernaehrung else '-' }}</p>
+    <p><strong>Medikation:</strong> {{ patient.medikation if patient.medikation else '-' }}</p>
+    <p><strong>Drogenanamnese:</strong> {{ patient.drogen if patient.drogen else '-' }}</p>
+    {# NEU: Raucher anzeigen #}
+    <p><strong>Raucher:</strong> {{ 'Ja' if patient.raucher else 'Nein' }}</p>
+    <p><strong>OP-Vorgeschichte:</strong> {{ patient.op_vorgeschichte if patient.op_vorgeschichte else '-' }}</p>
+    <p><strong>Allergien:</strong> {{ patient.allergien if patient.allergien else '-' }}</p>
+
+    <p><strong>Risikogruppe:</strong> {{ 'Ja' if patient.risikogruppe else 'Nein' }}</p>
+
+
+    {# Dynamisch ermittelte Datumsfelder anzeigen #}
+    <h3>Termine und Visiten 📅📝</h3> {# NEU: Emojis #}
+    {# 'last_visit_date' wird von der Route übergeben und ist ein date-Objekt oder None #}
+    <p><strong>Letzte Visite:</strong> {{ last_visit_date.strftime('%d.%m.%Y') if last_visit_date else 'Noch keine Visiten erfasst' }}</p>
+    {# 'next_appointment_datetime' wird von der Route übergeben und ist ein datetime-Objekt oder None #}
+    <p><strong>Nächster Termin:</strong> {{ next_appointment_datetime.strftime('%d.%m.%Y %H:%M') if next_appointment_datetime else 'Kein bevorstehender Termin' }}</p>
+
+
+    <hr>
+
+    <!-- Bereich für Vitalwerte -->
+    <div class="vital-signs-area">
+        <h4>Vitalwerte ❤️</h4> {# Spritze mit durchsichtiger Flüssigkeit #}
+        <p><a href="{{ url_for('bp.add_vital_sign', patient_id=patient.id) }}" class="btn btn-primary btn-sm">Neue Vitalwerte hinzufügen</a></p>
+
+        {% if patient.vital_signs %}
+            <table class="table table-striped table-bordered">
+                <thead>
+                    <tr>
+                        <th>Datum/Zeit</th> {# NEU: Datum/Zeit anzeigen #}
+                        <th>Größe (cm)</th>
+                        <th>Gewicht (kg)</th>
+                        <th>BMI</th>
+                        <th>Puls</th>
+                        <th>Blutdruck</th>
+                        <th>Temp (°C)</th>
+                        <th>FEV1 (L)</th>
+                        <th>FVC (L)</th>
+                        <th>Aktionen</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for vital_sign in patient.vital_signs %}
+                    <tr>
+                        {# KORRIGIERT: Datum und Uhrzeit aus timestamp anzeigen #}
+                        <td>{{ vital_sign.timestamp.strftime('%Y-%m-%d %H:%M') if vital_sign.timestamp else '-' }}</td>
+                        <td>{{ vital_sign.height_cm if vital_sign.height_cm is not none else '-' }}</td>
+                        <td>{{ vital_sign.weight_kg if vital_sign.weight_kg is not none else '-' }}</td>
+                        <td>{{ vital_sign.bmi if vital_sign.bmi is not none else '-' }}</td>
+                        <td>{{ vital_sign.puls if vital_sign.puls is not none else '-' }}</td>
+                        <td>{{ vital_sign.blood_pressure if vital_sign.blood_pressure else '-' }}</td>
+                        <td>{{ vital_sign.temperature_celsius if vital_sign.temperature_celsius is not none else '-' }}</td>
+                        <td>{{ vital_sign.fev1 if vital_sign.fev1 is not none else '-' }}</td>
+                        <td>{{ vital_sign.fvc if vital_sign.fvc is not none else '-' }}</td>
+                         <td>
+                             <a href="{{ url_for('bp.edit_vital_sign', vital_sign_id=vital_sign.id) }}" class="btn btn-secondary btn-sm me-1">Bearbeiten</a>
+                             <form action="{{ url_for('bp.delete_vital_sign', vital_sign_id=vital_sign.id) }}" method="POST" style="display:inline-block;">
+                                 <input type="hidden" name="csrf_token" value="{{ csrf_token() | safe }}">
+                                 <button type="submit" class="btn btn-danger btn-sm" onclick="return confirm('Sicher, dass diese Vitalwerte gelöscht werden sollen?');">Löschen</button>
+                             </form>
+                         </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        {% else %}
+            <p>Für diesen Patienten sind noch keine Vitalwerte erfasst.</p>
+        {% endif %}
+    </div>
+
+    <hr>
+
+    <!-- Bereich für Impfungen -->
+    <div class="vaccination-area">
+        <h4>Impfungen 💉</h4> {# Spritze mit durchsichtiger Flüssigkeit #}
+        <p><a href="{{ url_for('bp.add_vaccination', patient_id=patient.id) }}" class="btn btn-primary btn-sm">Neue Impfung hinzufügen</a></p>
+
+        {% if patient.vaccinations %}
+            <table class="table table-striped table-bordered">
+                <thead>
+                    <tr>
+                        <th>Datum</th>
+                        <th>Impfung gegen</th>
+                        <th>Impfstoff</th>
+                        <th>Dosis/Menge (ml)</th>
+                        <th>Verabreichungsform</th>
+                        <th>Chargen-Nr.</th>
+                        <th>Beobachtungen</th>
+                        <th>Unterzeichnet von</th>
+                        <th>Nächste Dosis</th>
+                        <th>Aktionen</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for vaccination in patient.vaccinations %}
+                    <tr>
+                        <td>{{ vaccination.date.strftime('%Y-%m-%d') if vaccination.date else '-' }}</td>
+                        <td>{{ vaccination.vaccine_against if vaccination.vaccine_against else '-' }}</td>
+                        <td>{{ vaccination.vaccine_name if vaccination.vaccine_name else '-' }}</td>
+                        <td>{{ vaccination.dosage if vaccination.dosage else '-' }}</td>
+                        <td>{{ vaccination.route if vaccination.route else '-' }}</td>
+                        <td>{{ vaccination.batch_number if vaccination.batch_number else '-' }}</td>
+                        <td>{{ vaccination.observations if vaccination.observations else '-' }}</td>
+                        <td>{{ vaccination.signed_by if vaccination.signed_by else '-' }}</td>
+                        <td>{{ vaccination.next_dosage_date.strftime('%Y-%m-%d') if vaccination.next_dosage_date else '-' }}</td>
+                         <td>
+                             <a href="{{ url_for('bp.edit_vaccination', vaccination_id=vaccination.id) }}" class="btn btn-secondary btn-sm me-1">Bearbeiten</a>
+                             <form action="{{ url_for('bp.delete_vaccination', vaccination_id=vaccination.id) }}" method="POST" style="display:inline-block;">
+                                  <input type="hidden" name="csrf_token" value="{{ csrf_token() | safe }}">
+                                 <button type="submit" class="btn btn-danger btn-sm" onclick="return confirm('Sicher, dass diese Impfung gelöscht werden soll?');">Löschen</button>
+                             </form>
+                         </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        {% else %}
+            <p>Für diesen Patienten sind noch keine Impfungen erfasst.</p>
+        {% endif %}
+    </div>
+
+    <hr>
+
+    <!-- Bereich für Injektionen -->
+    <div class="injection-area">
+        <h4>Injektionen 💉</h4> {# Spritze mit durchsichtiger Flüssigkeit #}
+        <p><a href="{{ url_for('bp.add_injection', patient_id=patient.id) }}" class="btn btn-primary btn-sm">Neue Injektion hinzufügen</a></p>
+
+        {% if patient.injections %}
+            <table class="table table-striped table-bordered">
+                <thead>
+                    <tr>
+                        <th>Datum</th>
+                        <th>Injektionsmittel</th>
+                        <th>Dosis/Menge (ml)</th>
+                        <th>Verabreichungsform</th>
+                        <th>Chargen-Nr.</th>
+                        <th>Beobachtungen</th>
+                        <th>Unterzeichnet von</th>
+                        <th>Nächste Dosis</th>
+                        <th>Aktionen</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for injection in patient.injections %}
+                    <tr>
+                        <td>{{ injection.date.strftime('%Y-%m-%d') if injection.date else '-' }}</td>
+                        <td>{{ injection.injection_substance if injection.injection_substance else '-' }}</td>
+                        <td>{{ injection.dosage if injection.dosage else '-' }}</td>
+                        <td>{{ injection.route if injection.route else '-' }}</td>
+                        <td>{{ injection.batch_number if injection.batch_number else '-' }}</td>
+                        <td>{{ injection.observations if injection.observations else '-' }}</td>
+                        <td>{{ injection.signed_by if injection.signed_by else '-' }}</td>
+                        <td>{{ injection.next_dosage_date.strftime('%Y-%m-%d') if injection.next_dosage_date else '-' }}</td>
+                         <td>
+                             <a href="{{ url_for('bp.edit_injection', injection_id=injection.id) }}" class="btn btn-secondary btn-sm me-1">Bearbeiten</a>
+                             <form action="{{ url_for('bp.delete_injection', injection_id=injection.id) }}" method="POST" style="display:inline-block;">
+                                 <input type="hidden" name="csrf_token" value="{{ csrf_token() | safe }}">
+                                 <button type="submit" class="btn btn-danger btn-sm" onclick="return confirm('Sicher, dass diese Injektion gelöscht werden soll?');">Löschen</button>
+                             </form>
+                         </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        {% else %}
+            <p>Für diesen Patienten sind noch keine Injektionen erfasst.</p>
+        {% endif %}
+    </div>
+
+    <hr>
+
+    <!-- Bereich für Termine -->
+    <div class="appointment-area">
+        <h4>Termine 📅</h4> {# NEU: Emoji #}
+        <p><a href="{{ url_for('bp.add_appointment_patient', patient_id=patient.id) }}" class="btn btn-primary btn-sm">Neuen Termin hinzufügen</a></p>
+
+        {% if patient.appointments %}
+            <table class="table table-striped table-bordered">
+                <thead>
+                    <tr>
+                        <th>Datum</th>
+                        <th>Uhrzeit</th>
+                        <th>Beschreibung</th>
+                        <th>Dauer (Minuten)</th>
+                        <th>Notizen</th>
+                        <th>Aktionen</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for appointment in patient.appointments %}
+                    <tr>
+                         {# Datum und Uhrzeit formatieren #}
+                        <td>{{ appointment.date_time.strftime('%Y-%m-%d') if appointment.date_time else '-' }}</td>
+                        <td>{{ appointment.date_time.strftime('%H:%M') if appointment.date_time else '-' }}</td>
+                        <td>{{ appointment.description if appointment.description else '-' }}</td>
+                        <td>{{ appointment.duration_minutes if appointment.duration_minutes is not none else '-' }}</td>
+                        <td>{{ appointment.notes if appointment.notes else '-' }}</td>
+                         <td>
+                             <a href="{{ url_for('bp.edit_appointment', appointment_id=appointment.id) }}" class="btn btn-secondary btn-sm me-1">Bearbeiten</a>
+                             <form action="{{ url_for('bp.delete_appointment', appointment_id=appointment.id) }}" method="POST" style="display:inline-block;">
+                                  <input type="hidden" name="csrf_token" value="{{ csrf_token() | safe }}">
+                                 <button type="submit" class="btn btn-danger btn-sm" onclick="return confirm('Sicher, dass dieser Termin gelöscht werden soll?');">Löschen</button>
+                             </form>
+                         </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        {% else %}
+            <p>Für diesen Patienten sind noch keine Termine erfasst.</p>
+        {% endif %}
+    </div>
+
+    <hr>
+
+     <!-- Bereich für Visiten/Behandlungen -->
+    <div class="visit-area">
+        <h4>Visiten / Behandlungen 📝</h4> {# NEU: Emoji #}
+        <p><a href="{{ url_for('bp.add_visit_patient', patient_id=patient.id) }}" class="btn btn-primary btn-sm">Neue Visite hinzufügen</a></p>
+
+        {% if patient.visits %}
+            <table class="table table-striped table-bordered">
+                <thead>
+                    <tr>
+                        <th>Datum</th>
+                        <th>Uhrzeit</th>
+                        <th>Subjektiv</th>
+                        <th>Objektiv</th>
+                        <th>Beurteilung</th>
+                        <th>Plan</th>
+                        <th>Unterzeichnet von</th>
+                        <th>Aktionen</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for visit in patient.visits %}
+                    <tr>
+                         {# Datum und Uhrzeit formatieren #}
+                        <td>{{ visit.date_time.strftime('%Y-%m-%d') if visit.date_time else '-' }}</td>
+                        <td>{{ visit.date_time.strftime('%H:%M') if visit.date_time else '-' }}</td>
+                        <td>{{ visit.subjective if visit.subjective else '-' }}</td>
+                        <td>{{ visit.objective if visit.objective else '-' }}</td>
+                        <td>{{ visit.assessment if visit.assessment else '-' }}</td>
+                        <td>{{ visit.plan if visit.plan else '-' }}</td>
+                        <td>{{ visit.signed_by if visit.signed_by else '-' }}</td>
+                         <td>
+                             <a href="{{ url_for('bp.edit_visit', visit_id=visit.id) }}" class="btn btn-secondary btn-sm me-1">Bearbeiten</a>
+                             <form action="{{ url_for('bp.delete_visit', visit_id=visit.id) }}" method="POST" style="display:inline-block;">
+                                 <input type="hidden" name="csrf_token" value="{{ csrf_token() | safe }}">
+                                 <button type="submit" class="btn btn-danger btn-sm" onclick="return confirm('Sicher, dass diese Visite gelöscht werden soll?');">Löschen</button>
+                             </form>
+                         </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        {% else %}
+            <p>Für diesen Patienten sind noch keine Visiten erfasst.</p>
+        {% endif %}
+    </div>
+
+{% endblock content %}

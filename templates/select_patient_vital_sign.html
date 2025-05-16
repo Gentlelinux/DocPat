@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+{% block title %}{{ title }}{% endblock %}
+
+{% block content %}
+    <h2>{{ title }}</h2>
+
+    <p>Bitte wählen Sie den Patienten aus, dem Sie Vitalwerte hinzufügen möchten.</p>
+
+    {# Include der partiellen Vorlage für das Patientenauswahl-Formular #}
+    {# GEÄNDERT: Kein 'with' mehr verwenden #}
+    {% include '_patient_select_form.html' %}
+
+    <p><a href="{{ url_for('bp.index') }}">Zurück zum Dashboard</a></p>
+
+{% endblock %}

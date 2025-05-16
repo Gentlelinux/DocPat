@@ -1,0 +1,55 @@
+{% extends "base.html" %}
+{% block title %}{{ title }}{% endblock %}
+
+{% block content %}
+    <h2>{{ title }}</h2>
+
+    <p><a href="{{ url_for('bp.add_visit_general') }}" class="btn btn-primary mb-3">Neue Visite hinzufügen</a></p>
+
+    {% if visits %}
+        <table class="table table-striped table-bordered">
+            <thead>
+                <tr>
+                    <th>Datum</th>
+                    <th>Uhrzeit</th>
+                    <th>Patient</th>
+                    <th>Subjektiv</th>
+                    <th>Objektiv</th>
+                    <th>Beurteilung</th>
+                    <th>Plan</th>
+                    <th>Unterzeichnet von</th>
+                    <th>Aktionen</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for visit in visits %}
+                <tr>
+                    <td>{{ visit.date_time.strftime('%Y-%m-%d') if visit.date_time else '-' }}</td>
+                    <td>{{ visit.date_time.strftime('%H:%M') if visit.date_time else '-' }}</td>
+                    <td>
+                         <a href="{{ url_for('bp.view_patient', patient_id=visit.patient_id) }}">
+                            {{ visit.patient.nachname }}, {{ visit.patient.vorname }}
+                        </a>
+                    </td>
+                    <td>{{ visit.subjective if visit.subjective else '-' }}</td>
+                    <td>{{ visit.objective if visit.objective else '-' }}</td>
+                    <td>{{ visit.assessment if visit.assessment else '-' }}</td>
+                    <td>{{ visit.plan if visit.plan else '-' }}</td>
+                    <td>{{ visit.signed_by if visit.signed_by else '-' }}</td>
+                     <td>
+                         <a href="{{ url_for('bp.edit_visit', visit_id=visit.id) }}" class="btn btn-secondary btn-sm me-1">Bearbeiten</a>
+                         <form action="{{ url_for('bp.delete_visit', visit_id=visit.id) }}" method="POST" style="display:inline-block;">
+                              <input type="hidden" name="csrf_token" value="{{ csrf_token() | safe }}"> {# <-- NEU: Manuelles Input-Feld #}
+                             <button type="submit" class="btn btn-danger btn-sm" onclick="return confirm('Sicher, dass diese Visite gelöscht werden soll?');">Löschen</button>
+                             </form>
+                         </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        {% else %}
+            <p>Es sind noch keine Visiten erfasst.</p>
+        {% endif %}
+    </div>
+
+{% endblock content %}

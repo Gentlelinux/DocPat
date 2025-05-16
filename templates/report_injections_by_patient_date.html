@@ -1,0 +1,106 @@
+{% extends "base.html" %}
+{% block title %}{{ title }}{% endblock %}
+
+{% block content %}
+    <h2>{{ title }}</h2>
+
+    <p><a href="{{ url_for('bp.reports_index') }}">Zurück zur Reports-Übersicht</a></p>
+
+    {# Formular zum Filtern nach Patient und Datum #}
+    <form method="POST" action=""> {# Action bleibt leer, postet zur aktuellen Route #}
+        {{ form.hidden_tag() }} {# CSRF Schutz #}
+
+        {# Patientenauswahlfeld #}
+        <div class="form-group mb-3">
+            {{ form.patient_id.label(class="form-label") }}<br>
+            {{ form.patient_id(class="form-control") }}
+             {% for error in form.patient_id.errors %} {# KORRIGIERT #}
+                <span class="text-danger">[{{ error }}]</span>
+            {% endfor %}
+        </div>
+
+        {# Startdatum #}
+        <div class="form-group mb-3">
+            {{ form.start_date.label(class="form-label") }}<br>
+            {{ form.start_date(class="form-control") }}
+            {% for error in form.start_date.errors %} {# KORRIGIERT #}
+                <span class="text-danger">[{{ error }}]</span>
+            {% endfor %}
+        </div>
+
+        {# Enddatum #}
+        <div class="form-group mb-3">
+            {{ form.end_date.label(class="form-label") }}<br>
+            {{ form.end_date(class="form-control") }}
+            {% for error in form.end_date.errors %} {# KORRIGIERT #}
+                <span class="text-danger">[{{ error }}]</span>
+            {% endfor %}
+        </div>
+
+        <br>
+        <div class="form-group">
+            {{ form.submit(value='Report generieren', class="btn btn-primary") }}
+        </div>
+    </form>
+
+    <hr>
+
+    {# Anzeige der Ergebnisse #}
+    <h3>Ergebnisse
+        {# Angepasst: Zeigt Patient nur an, wenn er gesetzt ist #}
+        {% if selected_patient %}
+            für Patient: {{ selected_patient.nachname }}, {{ selected_patient.vorname }}
+        {% else %}
+            für alle Patienten
+        {% endif %}
+         {# Angepasst: Zeigt Datumsbereich nur an, wenn er gesetzt ist #}
+         {% if start_date and end_date %}
+            im Zeitraum vom {{ start_date.strftime('%d.%m.%Y') }} bis {{ end_date.strftime('%d.%m.%Y') }}
+        {% elif start_date %}
+            ab dem {{ start_date.strftime('%d.%m.%Y') }}
+         {% elif end_date %}
+            bis zum {{ end_date.strftime('%d.%m.%Y') }}
+        {% endif %}
+        ({{ injections | length }} Injektionen gefunden)
+    </h3>
+
+    {% if injections %}
+        <table class="table table-striped table-bordered">
+            <thead>
+                <tr>
+                    <th>Datum</th>
+                    <th>Patient</th>
+                    <th>Injektionsmittel</th>
+                    <th>Dosis/Menge (ml)</th>
+                    <th>Verabreichungsform</th>
+                    <th>Chargen-Nr.</th>
+                    <th>Beobachtungen</th>
+                    <th>Unterzeichnet von</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for injection in injections %}
+                <tr>
+                    <td>{{ injection.date.strftime('%Y-%m-%d') if injection.date else '-' }}</td>
+                     <td>
+                         <a href="{{ url_for('bp.view_patient', patient_id=injection.patient_id) }}">
+                            {{ injection.patient.nachname }}, {{ injection.patient.vorname }}
+                        </a>
+                    </td>
+                    <td>{{ injection.injection_substance if injection.injection_substance else '-' }}</td>
+                    <td>{{ injection.dosage if injection.dosage else '-' }}</td>
+                     <td>{{ injection.route if injection.route else '-' }}</td>
+                    <td>{{ injection.batch_number if injection.batch_number else '-' }}</td>
+                    <td>{{ injection.observations if injection.observations else '-' }}</td>
+                    <td>{{ injection.signed_by if injection.signed_by else '-' }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    {% elif form.is_submitted() %}
+        <p>Keine Injektionen gefunden, die den Kriterien entsprechen.</p>
+    {% else %}
+        <p>Bitte wählen Sie optional Filterkriterien aus, um Injektionen anzuzeigen.</p>
+    {% endif %}
+
+{% endblock content %}

@@ -1,0 +1,118 @@
+{% extends "base.html" %}
+{% block title %}{{ title }}{% endblock %}
+
+{% block content %}
+    <h2>Willkommen im DocPat Dashboard! 🩺</h2>
+
+    <p>Heute ist der {{ current_date.strftime('%d.%m.%Y') }}.</p> {# Aktuelles Datum anzeigen #}
+
+    <div class="row"> {# Bootstrap Row für Layout #}
+
+        {# Spalte für Suche und Anlegen #}
+        <div class="col-md-6"> {# Nimmt 6 von 12 Spalten auf mittelgroßen/großen Bildschirmen #}
+            <h3>Schnellsuche nach Patienten 🔍</h3> {# Such-Emoji #}
+             {# Patientensuche Formular #}
+             {# Die Action führt zur Patientenliste, die den Suchbegriff aus request.args liest #}
+            <form method="GET" action="{{ url_for('bp.patient_list') }}" class="form-inline"> {# METHOD GET für Suche #}
+                 {{ patient_search_form.hidden_tag() }} {# CSRF Schutz ist bei GET-Formularen nicht zwingend, aber schadet nicht #}
+                <div class="input-group mb-3"> {# Bootstrap Input Gruppe #}
+                    {{ patient_search_form.search_term(class="form-control", placeholder="Nach Nachname oder Vorname suchen...") }} {# Bootstrap Form Control #}
+                     <button class="btn btn-outline-primary" type="submit">{{ patient_search_form.submit.label }}</button> {# Bootstrap Button #}
+                </div>
+            </form>
+
+            <br>
+
+            <h3>Neu anlegen ✨</h3> {# Anlegen-Emoji #}
+            <p>Hier können Sie neue Einträge erstellen:</p>
+            <ul>
+                {# Direkte Links zu Anlegeformularen, die keine sofortige Patientenauswahl brauchen (Patient wird im Formular gewählt oder ist global) #}
+                <li><a href="{{ url_for('bp.add_patient') }}">Neuen Patienten anlegen 🧑‍⚕️</a></li> {# Emoji #}
+                <li><a href="{{ url_for('bp.add_appointment_general') }}">Neuen Termin anlegen ⏰</a></li> {# Emoji #}
+                <li><a href="{{ url_for('bp.add_visit_general') }}">Neue Visite/Behandlung anlegen 📝</a></li> {# Emoji #}
+                {# NEU: Links zu den Patientenauswahl-Seiten vor dem Anlegen #}
+                <li><a href="{{ url_for('bp.add_vaccination_select_patient') }}">Neue Impfung anlegen 💉</a></li> {# Emoji #}
+                <li><a href="{{ url_for('bp.add_injection_select_patient') }}">Neue Injektion anlegen 🩸</a></li> {# Emoji #}
+                <li><a href="{{ url_for('bp.add_vital_sign_select_patient') }}">Neue Vitalwerte anlegen ❤️</a></li> {# Emoji #}
+            </ul>
+
+
+             <br>
+
+            <h3>Suchen und Reports 📄📊</h3> {# Emojis #}
+            <p>Hier können Sie Einträge suchen oder Reports generieren:</p>
+            <ul>
+                 <li><a href="{{ url_for('bp.patient_list') }}">Alle Patienten anzeigen 📄</a></li> {# Link zur gesamten Patientenliste #}
+                 <li><a href="{{ url_for('bp.list_appointments') }}">Terminübersicht anzeigen 📅</a></li> {# Link zur gesamten Terminübersicht #}
+                 <li><a href="{{ url_for('bp.list_visits') }}">Visitenübersicht anzeigen 📝</a></li> {# Link zur gesamten Visitenübersicht #}
+                 {# NEU: Explizite Links zu den Reports (die auch als Suchseiten dienen) #}
+                 <li><a href="{{ url_for('bp.report_vaccinations_by_patient_date') }}">Impfungen suchen/Report Impfungen 💉</a></li> {# Link zum Impf-Report #}
+                 <li><a href="{{ url_for('bp.report_injections_by_patient_date') }}">Injektionen suchen/Report Injektionen 🩸</a></li> {# Link zum Injektions-Report #}
+                 <li><a href="{{ url_for('bp.report_vital_signs_by_patient_date') }}">Vitalwerte suchen/Report Vitalwerte ❤️</a></li> {# Link zum Vitalwerte-Report #}
+                 {# Link zur Reports-Indexseite, falls es noch andere Reports gibt #}
+                 <li><a href="{{ url_for('bp.reports_index') }}">Weitere Reports 📊</a></li>
+            </ul>
+
+
+        </div>
+
+        {# Spalte für Übersichtsdaten #}
+        <div class="col-md-6"> {# Nimmt 6 von 12 Spalten #}
+            <h3>Übersicht ✨</h3> {# Emoji #}
+
+            {# Karte für Patientenzahl #}
+            <div class="card text-center mb-3"> {# Bootstrap Card #}
+                <div class="card-body">
+                    <h5 class="card-title">Gesamtzahl Patienten</h5>
+                    <p class="card-text display-4">{{ total_patients }}</p> {# Große Zahl #}
+                </div>
+            </div>
+
+            {# Karte für nächste Termine #}
+            <div class="card mb-3">
+                <div class="card-header">
+                    Nächste Termine ⏰
+                </div>
+                <ul class="list-group list-group-flush"> {# Bootstrap Liste #}
+                    {% if upcoming_appointments %}
+                        {% for appointment in upcoming_appointments %}
+                            <li class="list-group-item">
+                                {{ appointment.date_time.strftime('%d.%m.%Y %H:%M') }}:
+                                <a href="{{ url_for('bp.view_patient', patient_id=appointment.patient_id) }}">
+                                     {{ appointment.patient.nachname }}, {{ appointment.patient.vorname }}
+                                </a> - {{ appointment.description }}
+                            </li>
+                        {% endfor %}
+                    {% else %}
+                         <li class="list-group-item">Keine bevorstehenden Termine gefunden.</li>
+                    {% endif %}
+                </ul>
+            </div>
+
+            {# Karte für letzte Visiten #}
+            <div class="card mb-3">
+                <div class="card-header">
+                    Letzte Visiten 📝
+                </div>
+                 <ul class="list-group list-group-flush">
+                    {% if recent_visits %}
+                        {% for visit in recent_visits %}
+                            <li class="list-group-item">
+                                {{ visit.date_time.strftime('%d.%m.%Y %H:%M') }}:
+                                <a href="{{ url_for('bp.view_patient', patient_id=visit.patient_id) }}">
+                                     {{ visit.patient.nachname }}, {{ visit.patient.vorname }}
+                                </a> - {{ visit.assessment | truncate(50) if visit.assessment else 'Keine Beurteilung' }} {# Kurze Beurteilung #}
+                            </li>
+                        {% endfor %}
+                    {% else %}
+                         <li class="list-group-item">Keine letzten Visiten gefunden.</li>
+                    {% endif %}
+                </ul>
+            </div>
+
+        </div>
+
+    </div>
+
+
+{% endblock content %}

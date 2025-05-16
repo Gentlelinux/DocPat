@@ -1,0 +1,113 @@
+{% extends "base.html" %} {# Stelle sicher, dass dies der richtige Name deiner Basisvorlage ist #}
+{% block title %}Impfung bearbeiten für {{ patient.nachname }}, {{ patient.vorname }}{% endblock %} {# Patient ist hier immer bekannt #}
+
+{% block content %}
+    <h2>Impfung bearbeiten für Patient: {{ patient.nachname }}, {{ patient.vorname }}</h2> {# Patient ist hier immer bekannt #}
+
+    {# Action zeigt zur edit_vaccination Route mit der ID der Impfung #}
+    <form method="POST" action="{{ url_for('bp.edit_vaccination', vaccination_id=vaccination.id) }}">
+        {{ form.hidden_tag() }} {# Wichtig für Flask-WTF Sicherheitsfeatures #}
+
+        {# KORRIGIERT: Patientenauswahl oder verstecktes patient_id Feld entfernt. Patient kommt über die URL. #}
+         {# Optional: Zeige Patientennamen an #}
+        <p>Patient: {{ patient.nachname }}, {{ patient.vorname }}</p>
+
+
+        <div class="form-group mb-3">
+            {{ form.date.label(class="form-label") }}<br>
+            {{ form.date(class="form-control") }}
+            {% for error in form.date.errors %}
+                <span class="text-danger">[{{ error }}]</span>
+            {% endfor %}
+        </div>
+
+        {# KORRIGIERT: time Feld entfernt - VaccinationForm hat kein time Feld #}
+        {#
+         <div class="form-group mb-3">
+            {{ form.time.label(class="form-label") }}<br>
+            {{ form.time(class="form-control") }}
+            {% for error in form.time.errors %}
+                <span class="text-danger">[{{ error }}]</span>
+            {% endfor %}
+        </div>
+        #}
+
+
+        <div class="form-group mb-3">
+            {{ form.vaccine_against.label(class="form-label") }}<br>
+            {{ form.vaccine_against(class="form-control") }}
+             {% for error in form.vaccine_against.errors %}
+                <span class="text-danger">[{{ error }}]</span>
+            {% endfor %}
+        </div>
+
+        <div class="form-group mb-3">
+            {{ form.vaccine_name.label(class="form-label") }}<br>
+            {{ form.vaccine_name(class="form-control") }}
+            {% for error in form.vaccine_name.errors %}
+                <span class="text-danger">[{{ error }}]</span>
+            {% endfor %}
+        </div>
+
+        <div class="form-group mb-3">
+            {{ form.dosage.label(class="form-label") }}<br>
+            {{ form.dosage(class="form-control") }}
+             {% for error in form.dosage.errors %}
+                <span class="text-danger">[{{ error }}]</span>
+            {% endfor %}
+        </div>
+
+        {# Feld für den Verabreichungsweg #}
+         <div class="form-group mb-3">
+            {{ form.route.label(class="form-label") }}<br>
+            {{ form.route(class="form-control") }}
+             {% for error in form.route.errors %}
+                <span class="text-danger">[{{ error }}]</span>
+            {% endfor %}
+        </div>
+
+
+        <div class="form-group mb-3">
+            {{ form.next_dosage_date.label(class="form-label") }}<br>
+            {{ form.next_dosage_date(class="form-control") }}
+             {% for error in form.next_dosage_date.errors %}
+                <span class="text-danger">[{{ error }}]</span>
+            {% endfor %}
+        </div>
+
+
+        <div class="form-group mb-3">
+            {{ form.batch_number.label(class="form-label") }}<br>
+            {{ form.batch_number(class="form-control") }}
+             {% for error in form.batch_number.errors %}
+                <span class="text-danger">[{{ error }}]</span>
+            {% endfor %}
+        </div>
+
+        <div class="form-group mb-3">
+            {{ form.observations.label(class="form-label") }}<br>
+            {{ form.observations(class="form-control") }}
+             {% for error in form.observations.errors %}
+                <span class="text-danger">[{{ error }}]</span>
+            {% endfor %}
+        </div>
+
+        <div class="form-group mb-3">
+            {{ form.signed_by.label(class="form-label") }}<br>
+            {{ form.signed_by(class="form-control") }}
+             {% for error in form.signed_by.errors %}
+                <span class="text-danger">[{{ error }}]</span>
+            {% endfor %}
+        </div>
+
+        <br>
+
+        <div class="form-group">
+            {{ form.submit(value='Änderungen speichern', class="btn btn-primary") }}
+        </div>
+    </form>
+
+    {# Zurück-Link führt immer zur Patientendetailseite #}
+    <p><a href="{{ url_for('bp.view_patient', patient_id=vaccination.patient_id) }}">Zurück zu Patientendetails</a></p>
+
+{% endblock content %}

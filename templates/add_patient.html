@@ -1,0 +1,198 @@
+{% extends "base.html" %}
+{% block title %}{{ title }}{% endblock %}
+
+{% block content %}
+    <h2>{{ title }}</h2>
+
+    <form method="POST">
+        {{ form.hidden_tag() }} {# Wichtig für Flask-WTF Sicherheitsfeatures #}
+
+        <div class="form-group mb-3"> {# Bootstrap form-group und margin-bottom #}
+            {{ form.vorname.label(class="form-label") }} {# Bootstrap form-label #}
+            {{ form.vorname(class="form-control") }} {# Bootstrap form-control #}
+            {% for error in form.vorname.errors %}
+                <span class="text-danger">[{{ error }}]</span> {# Bootstrap text-danger #}
+            {% endfor %}
+        </div>
+
+         <div class="form-group mb-3">
+            {{ form.nachname.label(class="form-label") }}
+            {{ form.nachname(class="form-control") }}
+            {% for error in form.nachname.errors %}
+                <span class="text-danger">[{{ error }}]</span>
+            {% endfor %}
+        </div>
+
+         {# KORRIGIERT: Statt Alter, Geburtsdatum-Feld anzeigen #}
+         <div class="form-group mb-3">
+            {{ form.geburtsdatum.label(class="form-label") }} {# Verwenden des neuen Feldes #}
+            {{ form.geburtsdatum(class="form-control") }} {# Rendern des neuen Feldes #}
+            {% for error in form.geburtsdatum.errors %}
+                <span class="text-danger">[{{ error }}]</span>
+            {% endfor %}
+        </div>
+
+         <div class="form-group mb-3">
+            {{ form.geschlecht.label(class="form-label") }}
+            {{ form.geschlecht(class="form-control") }}
+             {% for error in form.geschlecht.errors %}
+                <span class="text-danger">[{{ error }}]</span>
+            {% endfor %}
+        </div>
+
+         <div class="form-group mb-3">
+            {{ form.adresse.label(class="form-label") }}
+            {{ form.adresse(class="form-control") }}
+             {% for error in form.adresse.errors %}
+                <span class="text-danger">[{{ error }}]</span>
+            {% endfor %}
+        </div>
+
+        <div class="form-group mb-3">
+            {{ form.plz.label(class="form-label") }}
+            {{ form.plz(class="form-control") }}
+             {% for error in form.plz.errors %}
+                <span class="text-danger">[{{ error }}]</span>
+            {% endfor %}
+        </div>
+
+         <div class="form-group mb-3">
+            {{ form.ort.label(class="form-label") }}
+            {{ form.ort(class="form-control") }}
+             {% for error in form.ort.errors %}
+                <span class="text-danger">[{{ error }}]</span>
+            {% endfor %}
+        </div>
+
+        {# KORRIGIERT: Dropdown für Land anzeigen #}
+         <div class="form-group mb-3">
+            {{ form.land.label(class="form-label") }} {# Label für SelectField #}
+            {{ form.land(class="form-control") }} {# Rendern des SelectFields #}
+             {% for error in form.land.errors %}
+                <span class="text-danger">[{{ error }}]</span>
+            {% endfor %}
+        </div>
+
+        {# KORRIGIERT: Dropdown für Ethnie anzeigen #}
+         <div class="form-group mb-3">
+            {{ form.ethnie.label(class="form-label") }} {# Label für SelectField #}
+            {{ form.ethnie(class="form-control") }} {# Rendern des SelectFields #}
+             {% for error in form.ethnie.errors %}
+                <span class="text-danger">[{{ error }}]</span>
+            {% endfor %}
+        </div>
+
+        {# KORRIGIERT: Dropdown für Blutgruppe anzeigen #}
+         <div class="form-group mb-3">
+            {{ form.blutgruppe.label(class="form-label") }} {# Label für SelectField #}
+            {{ form.blutgruppe(class="form-control") }} {# Rendern des SelectFields #}
+             {% for error in form.blutgruppe.errors %}
+                <span class="text-danger">[{{ error }}]</span>
+            {% endfor %}
+        </div>
+
+
+         <div class="form-group mb-3">
+            {{ form.telefon.label(class="form-label") }}
+            {{ form.telefon(class="form-control") }}
+             {% for error in form.telefon.errors %}
+                <span class="text-danger">[{{ error }}]</span>
+            {% endfor %}
+        </div>
+
+         <div class="form-group mb-3">
+            {{ form.email.label(class="form-label") }}
+            {{ form.email(class="form-control") }}
+             {% for error in form.email.errors %}
+                <span class="text-danger">[{{ error }}]</span>
+            {% endfor %}
+        </div>
+
+         <div class="form-group mb-3">
+            {{ form.krankenkasse.label(class="form-label") }}
+            {{ form.krankenkasse(class="form-control") }}
+             {% for error in form.krankenkasse.errors %}
+                <span class="text-danger">[{{ error }}]</span>
+            {% endfor %}
+        </div>
+
+         <div class="form-group mb-3">
+            {{ form.diagnosen.label(class="form-label") }}
+            {{ form.diagnosen(class="form-control") }}
+             {% for error in form.diagnosen.errors %}
+                <span class="text-danger">[{{ error }}]</span>
+            {% endfor %}
+        </div>
+
+         <div class="form-group mb-3">
+            {{ form.ernaehrung.label(class="form-label") }}
+            {{ form.ernaehrung(class="form-control") }}
+             {% for error in form.ernaehrung.errors %}
+                <span class="text-danger">[{{ error }}]</span>
+            {% endfor %}
+        </div>
+
+         <div class="form-group mb-3">
+            {{ form.medikation.label(class="form-label") }}
+            {{ form.medikation(class="form-control") }}
+             {% for error in form.medikation.errors %}
+                <span class="text-danger">[{{ error }}]</span>
+            {% endfor %}
+        </div>
+
+         <div class="form-group mb-3">
+            {{ form.drogen.label(class="form-label") }}
+            {{ form.drogen(class="form-control") }}
+             {% for error in form.drogen.errors %}
+                <span class="text-danger">[{{ error }}]</span>
+            {% endfor %}
+        </div>
+
+        {# NEU: Checkbox für Raucher anzeigen #}
+        <div class="form-group form-check mb-3"> {# Checkbox mit Bootstrap form-check #}
+            {{ form.raucher(class="form-check-input") }} {# Rendern der Checkbox #}
+            {{ form.raucher.label(class="form-check-label") }} {# Label für Checkbox #}
+             {% for error in form.raucher.errors %}
+                <span class="text-danger">[{{ error }}]</span>
+            {% endfor %}
+        </div>
+
+
+         <div class="form-group mb-3">
+            {{ form.op_vorgeschichte.label(class="form-label") }}
+            {{ form.op_vorgeschichte(class="form-control") }}
+             {% for error in form.op_vorgeschichte.errors %}
+                <span class="text-danger">[{{ error }}]</span>
+            {% endfor %}
+        </div>
+
+         <div class="form-group mb-3">
+            {{ form.allergien.label(class="form-label") }}
+            {{ form.allergien(class="form-control") }}
+             {% for error in form.allergien.errors %}
+                <span class="text-danger">[{{ error }}]</span>
+            {% endfor %}
+        </div>
+
+        <div class="form-group form-check mb-3"> {# Checkbox mit Bootstrap form-check #}
+            {{ form.risikogruppe(class="form-check-input") }} {# Bootstrap form-check-input #}
+            {{ form.risikogruppe.label(class="form-check-label") }} {# Bootstrap form-check-label #}
+             {% for error in form.risikogruppe.errors %}
+                <span class="text-danger">[{{ error }}]</span>
+            {% endfor %}
+        </div>
+
+        {# Die Felder letzte_untersuchung und naechste_untersuchung
+           werden im Formular nicht mehr benötigt, da sie dynamisch berechnet werden.
+           Wir zeigen sie hier nicht an.
+        #}
+
+
+        <div class="form-group">
+            {{ form.submit(class="btn btn-primary") }} {# Der Speichern-Button #}
+        </div>
+    </form>
+
+    <p><a href="{{ url_for('bp.patient_list') }}">Zurück zur Patientenliste</a></p>
+
+{% endblock content %}

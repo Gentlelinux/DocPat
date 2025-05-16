@@ -1,0 +1,110 @@
+{% extends "base.html" %}
+{% block title %}{{ title }}{% endblock %}
+
+{% block content %}
+    <h2>{{ title }}</h2>
+
+    <p><a href="{{ url_for('bp.reports_index') }}">Zurück zur Reports-Übersicht</a></p>
+
+    {# Formular zum Filtern nach Patient und Datum #}
+    <form method="POST" action=""> {# Action bleibt leer, postet zur aktuellen Route #}
+        {{ form.hidden_tag() }} {# CSRF Schutz #}
+
+        {# Patientenauswahlfeld #}
+        <div class="form-group mb-3">
+            {{ form.patient_id.label(class="form-label") }}<br>
+            {{ form.patient_id(class="form-control") }}
+             {% for error in form.patient_id.errors %} {# KORRIGIERT #}
+                <span class="text-danger">[{{ error }}]</span>
+            {% endfor %}
+        </div>
+
+        {# Startdatum #}
+        <div class="form-group mb-3">
+            {{ form.start_date.label(class="form-label") }}<br>
+            {{ form.start_date(class="form-control") }}
+            {% for error in form.start_date.errors %} {# KORRIGIERT #}
+                <span class="text-danger">[{{ error }}]</span>
+            {% endfor %}
+        </div>
+
+        {# Enddatum #}
+        <div class="form-group mb-3">
+            {{ form.end_date.label(class="form-label") }}<br>
+            {{ form.end_date(class="form-control") }}
+            {% for error in form.end_date.errors %} {# KORRIGIERT #}
+                <span class="text-danger">[{{ error }}]</span>
+            {% endfor %}
+        </div>
+
+        <br>
+        <div class="form-group">
+            {{ form.submit(value='Report generieren', class="btn btn-primary") }}
+        </div>
+    </form>
+
+    <hr>
+
+    {# Anzeige der Ergebnisse #}
+    <h3>Ergebnisse
+        {# Angepasst: Zeigt Patient nur an, wenn er gesetzt ist #}
+        {% if selected_patient %}
+            für Patient: {{ selected_patient.nachname }}, {{ selected_patient.vorname }}
+        {% else %}
+            für alle Patienten
+        {% endif %}
+        {# Angepasst: Zeigt Datumsbereich nur an, wenn er gesetzt ist #}
+        {% if start_date and end_date %}
+            im Zeitraum vom {{ start_date.strftime('%d.%m.%Y') }} bis {{ end_date.strftime('%d.%m.%Y') }}
+        {% elif start_date %}
+            ab dem {{ start_date.strftime('%d.%m.%Y') }}
+         {% elif end_date %}
+            bis zum {{ end_date.strftime('%d.%m.%Y') }}
+        {% endif %}
+        ({{ vaccinations | length }} Impfungen gefunden)
+    </h3>
+
+    {% if vaccinations %}
+        <table class="table table-striped table-bordered">
+            <thead>
+                <tr>
+                    <th>Datum</th>
+                    <th>Patient</th>
+                    <th>Impfung gegen</th>
+                    <th>Impfstoff</th>
+                    <th>Dosis/Menge (ml)</th>
+                    <th>Verabreichungsform</th>
+                    <th>Chargen-Nr.</th>
+                    <th>Beobachtungen</th>
+                    <th>Unterzeichnet von</th>
+                    <th>Nächste Dosis</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for vaccination in vaccinations %}
+                <tr>
+                    <td>{{ vaccination.date.strftime('%Y-%m-%d') if vaccination.date else '-' }}</td>
+                    <td>
+                        <a href="{{ url_for('bp.view_patient', patient_id=vaccination.patient_id) }}">
+                            {{ vaccination.patient.nachname }}, {{ vaccination.patient.vorname }}
+                        </a>
+                    </td>
+                    <td>{{ vaccination.vaccine_against if vaccination.vaccine_against else '-' }}</td>
+                    <td>{{ vaccination.vaccine_name if vaccination.vaccine_name else '-' }}</td>
+                    <td>{{ vaccination.dosage if vaccination.dosage else '-' }}</td>
+                     <td>{{ vaccination.route if vaccination.route else '-' }}</td>
+                    <td>{{ vaccination.batch_number if vaccination.batch_number else '-' }}</td>
+                    <td>{{ vaccination.observations if vaccination.observations else '-' }}</td>
+                    <td>{{ vaccination.signed_by if vaccination.signed_by else '-' }}</td>
+                    <td>{{ vaccination.next_dosage_date.strftime('%Y-%m-%d') if vaccination.next_dosage_date else '-' }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    {% elif form.is_submitted() %}
+        <p>Keine Impfungen gefunden, die den Kriterien entsprechen.</p>
+    {% else %}
+        <p>Bitte wählen Sie optional Filterkriterien aus, um Impfungen anzuzeigen.</p>
+    {% endif %}
+
+{% endblock content %}
